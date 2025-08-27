@@ -78,7 +78,18 @@ public class Core {
     	return response.body();
     }
     
+    
     public String getCaralog() throws Exception{
+    	themeParam = "anime/catalog";
+    	String url = String.format("%s/%s", baseUrl, themeParam);
+    	HttpResponse<String> response = client.send(requests(url), HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) 
+            throw new RuntimeException("API request failed: " + response.statusCode());
+    	return response.body();
+    }
+    
+    
+    public String getSchedule() throws Exception{
     	themeParam = "anime/catalog";
     	String url = String.format("%s/%s", baseUrl, themeParam);
     	HttpResponse<String> response = client.send(requests(url), HttpResponse.BodyHandlers.ofString());
