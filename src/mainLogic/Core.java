@@ -97,6 +97,16 @@ public class Core {
             throw new RuntimeException("API request failed: " + response.statusCode());
     	return response.body();
     }
+    
+    
+    public String getOngoing() throws Exception{
+    	themeParam = "anime?status=ongoing&sort_forward=true&sort=top&offset=0&limit=20";
+    	String url = String.format("%s/%s", baseUrl, themeParam);
+    	HttpResponse<String> response = client.send(requests(url), HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) 
+            throw new RuntimeException("API request failed: " + response.statusCode());
+    	return response.body();
+    }
 }
 
 

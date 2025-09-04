@@ -111,44 +111,57 @@ public class GuiCore extends Application{
 	    Core client = new Core(baseUrl, apiKey);
 	    
 	    try {
-	    	String response = client.getCaralog();
-	    	JsonNode rootNode = mapper.readTree(response).path("response").path("data");
+	    	String response = client.getOngoing();
+	    	JsonNode rootNode = mapper.readTree(response).path("response");
 	    	for (JsonNode data: rootNode) {
 	    		String img = "https:" + data
 	                    .path("poster")
 	                    .path("fullsize").asText();
 	    		String name = data.path("title").asText();
 	    		String desc = data.path("description").asText("None");
-
+	    		double ratingInt = data.path("rating").path("average").asDouble(0);
+	    		String rating = String.format("%.2f", (double) ratingInt);
+	    		
     			StackPane infoOnImage = new StackPane();	
     			
 	            VBox vboxContentButton = new VBox(10);
 	            vboxContentButton.setAlignment(Pos.TOP_CENTER);
 	            vboxContentButton.setPadding(new Insets(25, 0, 0, 0));
 	            
-	            Image image = new Image(img, true);
+	            Image image = new Image(img, 200, 270, true, true, true);
 	            ImageView imageView = new ImageView(image);
 	            imageView.setFitWidth(200); 
 	            imageView.setFitHeight(270);
 	            imageView.setPreserveRatio(true);
 	            
+	            
 	            Label label_desc = new Label(desc);
 	            label_desc.setPrefSize(290, 200);
 	            label_desc.setWrapText(true);
-	            label_desc.setStyle("-fx-background-color: black;");
+	            label_desc.setStyle("-fx-background-color: black;"
+	            		+ "-fx-text-fill: white;");
 	            
 	            Label label_name = new Label(name);
 	            label_name.setPrefSize(150, 50);
 	            label_name.setWrapText(true);
-	            label_name.setStyle("-fx-background-color: rgba(155, 155, 155, 0.5);");
+	            label_name.setStyle("-fx-background-color: rgba(155, 155, 155, 0.5);"
+	            		+ "-fx-font-size: 18px;"
+	            		+ "-fx-text-fill: black;"
+	            		+ "-fx-text-alignment: center;");
+	            
+	            Label label_rating = new Label(rating);
+	            
 	            
 	            Button button = new Button("");
 	            button.setMinSize(300, 500);
+	            button.setPrefSize(300, 500);
+	            button.setMaxSize(300, 500); 
 	            button.setContentDisplay(ContentDisplay.TOP);
 	            button.setStyle("-fx-background-color: #3498db;");
 	            
-	            infoOnImage.getChildren().addAll(imageView, label_name);
+	            infoOnImage.getChildren().addAll(imageView, label_name, label_rating);
 	            StackPane.setAlignment(label_name, Pos.BOTTOM_CENTER);
+	            StackPane.setAlignment(label_rating, Pos.TOP_RIGHT);
 	            StackPane.setMargin(label_name, new Insets(10));
 	            vboxContentButton.getChildren().addAll(infoOnImage, label_desc);
 	            button.setGraphic(vboxContentButton);
