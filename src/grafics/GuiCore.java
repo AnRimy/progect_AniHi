@@ -1,15 +1,11 @@
 package grafics;
 
-import java.io.InputStream;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
@@ -27,8 +23,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-import javafx.animation.TranslateTransition;
-import javafx.util.Duration;
 
 import mainLogic.Core;
 import mainLogic.Config;
@@ -39,17 +33,26 @@ public class GuiCore extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
+		Button button_mainMenu = new Button();
+		button_mainMenu.setPrefSize(50, 50);
+		button_mainMenu.setStyle("-fx-background-radius: 10px");
+		
+		
 		BorderPane borderPane_root = new BorderPane();
-		StackPane backgroundContainer = new StackPane();
+		
+		StackPane stackPane_bot_panel = new StackPane();
+		stackPane_bot_panel.setMaxWidth(500);
+		stackPane_bot_panel.setMinHeight(60);
+		stackPane_bot_panel.getChildren().add(button_mainMenu);
+		StackPane.setAlignment(button_mainMenu, Pos.CENTER);
+		stackPane_bot_panel.setStyle("-fx-background-color: rgb(155, 12, 155);"
+				+ "-fx-border-radius: 10px;"
+				+ "-fx-background-radius: 10px");
+		
+		Image image = new Image("file:background.png");
+		borderPane_root.setStyle("-fx-background-image: url(" + image + ");");
 
 		BorderPane borderPane = new BorderPane();
-		Image image = new Image("file:background21111.png");
-        borderPane.setStyle("-fx-background-image: url('" + image + "'); " +
-                "-fx-background-size: cover; " +
-                "-fx-background-position: center; " +
-                "-fx-background-repeat: no-repeat;");
-        System.out.print(image);
-        
         
 		Button leftButton = new Button("◀");
 		Button rightButton = new Button("▶");
@@ -63,7 +66,7 @@ public class GuiCore extends Application {
 				    -fx-min-height: 60px;
 				    -fx-background-radius: 5px;
 				    -fx-border-radius: 60px;
-				""";
+				    """;
 		leftButton.setStyle(buttonStyle);
 		rightButton.setStyle(buttonStyle);
 
@@ -71,7 +74,7 @@ public class GuiCore extends Application {
 		hBox_titleToday.setPadding(new Insets(0, 50, 0, 50));
 		hBox_titleToday.setAlignment(Pos.CENTER_LEFT);
 		hBox_titleToday.setStyle("""
-			    -fx-background-color: transparent;
+			    -fx-background-color: grey;
 			    -fx-background: transparent;
 			""");
 
@@ -80,14 +83,14 @@ public class GuiCore extends Application {
 		scrollTitleToday.setVbarPolicy(ScrollBarPolicy.NEVER);
 		scrollTitleToday.setVvalue(0);
 		scrollTitleToday.setFitToHeight(true);
+		scrollTitleToday.setMaxHeight(520);
 		scrollTitleToday.setPrefViewportHeight(500);
 		scrollTitleToday.setPannable(true);
 		scrollTitleToday.setStyle("""
-			    -fx-background-color: transparent;
+			    -fx-background-color: blue;
 			    -fx-background: transparent;
 			""");
 
-		
 		StackPane overlayPane = new StackPane();
 		overlayPane.getChildren().add(scrollTitleToday);
 		overlayPane.getChildren().add(leftButton);
@@ -96,13 +99,17 @@ public class GuiCore extends Application {
 		StackPane.setAlignment(rightButton, Pos.CENTER_RIGHT);
 		StackPane.setMargin(leftButton, new Insets(0, 0, 0, 20));
 		StackPane.setMargin(rightButton, new Insets(0, 20, 0, 0));
+		overlayPane.setMaxHeight(625);
 		overlayPane.setStyle("""
-				-fx-background-color: transparent;
+				-fx-background-color: green;
 				-fx-background: transparent;
 		""");
 
 
 		borderPane_root.setCenter(overlayPane);
+		borderPane_root.setBottom(stackPane_bot_panel);
+		borderPane_root.setAlignment(stackPane_bot_panel, Pos.BOTTOM_CENTER);
+		borderPane_root.setMargin(stackPane_bot_panel, new Insets(10));
 
 		leftButton.setOnAction(e -> scrollLeft());
 		rightButton.setOnAction(e -> scrollRight());
@@ -162,11 +169,16 @@ public class GuiCore extends Application {
 	            contentContainer.setAlignment(Pos.TOP_CENTER);
 	            contentContainer.setPadding(new Insets(25, 0, 0, 0));
 
+	            // image and pruning
 	            ImageView sharpImageView = new ImageView(new Image(img, 200, 270, true, true, true));
 	            sharpImageView.setFitWidth(200);
 	            sharpImageView.setFitHeight(270);
 	            sharpImageView.setPreserveRatio(true);
-	
+	            Rectangle clip = new Rectangle(200, 270);
+	            clip.setArcWidth(20);
+	            clip.setArcHeight(20);
+	            sharpImageView.setClip(clip);
+	            
 	            StackPane imageContainer = new StackPane();
 	            imageContainer.setMinSize(200, 270);
 	            imageContainer.setMaxSize(200, 270);
