@@ -12,6 +12,7 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import javafx.scene.control.TextField;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -32,13 +33,33 @@ public class GuiCore extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
-		Button button_mainMenu = new Button();
+		Button button_mainMenu = new Button("Main");
 		button_mainMenu.setPrefSize(50, 50);
 		button_mainMenu.setStyle("-fx-background-radius: 25px");
 		
-		Button button_search = new Button();
-		button_search.setPrefSize(50, 50);
-		button_search.setStyle("-fx-background-radius: 25px");
+		// search widgets
+		StackPane sp_search = new StackPane();
+		sp_search.setMaxWidth(200);
+		sp_search.setMinHeight(50);
+		
+		TextField textField_search = new TextField();
+		textField_search.setPromptText("Поиск");
+		textField_search.setMaxWidth(200);
+		textField_search.setMaxHeight(60);
+		textField_search.setStyle("-fx-background-color: rgba(200, 25, 0, 0.9);"
+				+ "-fx-border-color: rgb(255, 234, 0);"
+				+ "-fx-background-radius: 30px;"
+				+ "-fx-border-radius: 30px;");
+		
+		Button button_search = new Button("search");
+		button_search.setPrefSize(48, 48);
+		button_search.setStyle("-fx-background-color: rgba(220, 25, 0, 1);"
+				+ "-fx-border-color: rgb(255, 234, 0);"
+				+ "-fx-border-radius: 25px;"
+				+ "-fx-background-radius: 25px;");
+		
+		sp_search.getChildren().setAll(textField_search, button_search);
+		sp_search.setAlignment(button_search, Pos.CENTER_RIGHT);
 		
 		
 		BorderPane borderPane_root = new BorderPane();
@@ -51,7 +72,7 @@ public class GuiCore extends Application {
 		HBox stackPane_bot_panel = new HBox(20);
 		stackPane_bot_panel.setMaxWidth(500);
 		stackPane_bot_panel.setMinHeight(60);
-		stackPane_bot_panel.getChildren().addAll(button_mainMenu, button_search);
+		stackPane_bot_panel.getChildren().addAll(button_mainMenu);
 		stackPane_bot_panel.setAlignment(Pos.CENTER);
 		stackPane_bot_panel.setStyle("-fx-background-color: rgba(155, 155, 155, 0.5);"
 				+ "-fx-border-radius: 30px;"
@@ -79,7 +100,7 @@ public class GuiCore extends Application {
 		hBox_titleToday.setPadding(new Insets(0, 50, 0, 50));
 		hBox_titleToday.setAlignment(Pos.CENTER_LEFT);
 		hBox_titleToday.setStyle("""
-			    -fx-background-color: transparent;
+			    -fx-background-color: rgba(155, 155, 0, 0.2);
 			    -fx-background: transparent;
 			""");
 
@@ -110,10 +131,12 @@ public class GuiCore extends Application {
 				-fx-background: transparent;
 		""");
 
-
 		borderPane_root.setCenter(overlayPane);
 		borderPane_root.setMargin(overlayPane, new Insets(0, 4, 0, 4));
 		borderPane_root.setBottom(stackPane_bot_panel);
+		borderPane_root.setTop(sp_search);
+		borderPane_root.setAlignment(sp_search, Pos.TOP_RIGHT);
+		borderPane_root.setMargin(sp_search, new Insets(15, 15, 0, 0));
 		borderPane_root.setAlignment(stackPane_bot_panel, Pos.BOTTOM_CENTER);
 		borderPane_root.setMargin(stackPane_bot_panel, new Insets(15));
 
@@ -147,7 +170,7 @@ public class GuiCore extends Application {
 	        String response = client.getOngoing();
 	        JsonNode rootNode = mapper.readTree(response).path("response");
 	        for (JsonNode data : rootNode) {
-	            String img = "https:" + data.path("poster").path("big").asText();// fullsize 
+	            String img = "https:" + data.path("poster").path("fullsize").asText();// fullsize 
 	            String name = data.path("title").asText();
 	            String desc = data.path("description").asText("None");
 	            double ratingDoub = data.path("rating").path("average").asDouble(0);

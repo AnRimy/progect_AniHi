@@ -76,13 +76,13 @@ public class WinTitle extends Stage{
 		
 		root.setLeft(img);
 		root.setRight(label_name);
-		root.setCenter(label_desc);
+		root.setBottom(label_desc);
 		root.setCenter(hbox_serPlayer);
 		root.setTop(label_genres);
 		
 		Scene scene = new Scene(root, 1920,  1080);
 		setScene(scene);
-		}
+	}
 	
 	
 	public String getRealVideoUrl(String iframeUrl) {
