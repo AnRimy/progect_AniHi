@@ -100,7 +100,7 @@ public class Core {
     
     
     public String getOngoing() throws Exception{
-    	themeParam = "anime?status=ongoing&sort_forward=true&sort=top&offset=0&limit=1";
+    	themeParam = "anime?status=ongoing&sort_forward=true&sort=top&offset=0&limit=20";
     	String url = String.format("%s/%s", baseUrl, themeParam);
     	HttpResponse<String> response = client.send(requests(url), HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) 

@@ -23,7 +23,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-
 import mainLogic.Core;
 import mainLogic.Config;
 
@@ -35,36 +34,42 @@ public class GuiCore extends Application {
 	public void start(Stage primaryStage) {
 		Button button_mainMenu = new Button();
 		button_mainMenu.setPrefSize(50, 50);
-		button_mainMenu.setStyle("-fx-background-radius: 10px");
+		button_mainMenu.setStyle("-fx-background-radius: 25px");
+		
+		Button button_search = new Button();
+		button_search.setPrefSize(50, 50);
+		button_search.setStyle("-fx-background-radius: 25px");
 		
 		
 		BorderPane borderPane_root = new BorderPane();
+		borderPane_root.setStyle("""
+			    -fx-background-color: linear-gradient(to bottom, #e74c3c, #e67e22);
+			    -fx-background-radius: 10px;
+			    -fx-background-insets: 5px;
+			""");
 		
-		StackPane stackPane_bot_panel = new StackPane();
+		HBox stackPane_bot_panel = new HBox(20);
 		stackPane_bot_panel.setMaxWidth(500);
 		stackPane_bot_panel.setMinHeight(60);
-		stackPane_bot_panel.getChildren().add(button_mainMenu);
-		StackPane.setAlignment(button_mainMenu, Pos.CENTER);
-		stackPane_bot_panel.setStyle("-fx-background-color: rgb(155, 12, 155);"
-				+ "-fx-border-radius: 10px;"
-				+ "-fx-background-radius: 10px");
-		
-		Image image = new Image("file:background.png");
-		borderPane_root.setStyle("-fx-background-image: url(" + image + ");");
+		stackPane_bot_panel.getChildren().addAll(button_mainMenu, button_search);
+		stackPane_bot_panel.setAlignment(Pos.CENTER);
+		stackPane_bot_panel.setStyle("-fx-background-color: rgba(155, 155, 155, 0.5);"
+				+ "-fx-border-radius: 30px;"
+				+ "-fx-background-radius: 30px");
 
 		BorderPane borderPane = new BorderPane();
         
-		Button leftButton = new Button("◀");
-		Button rightButton = new Button("▶");
+		Button leftButton = new Button("⇦");
+		Button rightButton = new Button("⇨");
 
 		String buttonStyle = """
-				    -fx-background-color: rgb(155, 155, 155);
+				    -fx-background-color: rgba(200, 25, 0, 0.6);
 				    -fx-text-fill: white;
 				    -fx-font-size: 24px;
 				    -fx-font-weight: bold;
 				    -fx-min-width: 60px;
 				    -fx-min-height: 60px;
-				    -fx-background-radius: 5px;
+				    -fx-background-radius: 60px;
 				    -fx-border-radius: 60px;
 				    """;
 		leftButton.setStyle(buttonStyle);
@@ -74,7 +79,7 @@ public class GuiCore extends Application {
 		hBox_titleToday.setPadding(new Insets(0, 50, 0, 50));
 		hBox_titleToday.setAlignment(Pos.CENTER_LEFT);
 		hBox_titleToday.setStyle("""
-			    -fx-background-color: grey;
+			    -fx-background-color: transparent;
 			    -fx-background: transparent;
 			""");
 
@@ -87,7 +92,7 @@ public class GuiCore extends Application {
 		scrollTitleToday.setPrefViewportHeight(500);
 		scrollTitleToday.setPannable(true);
 		scrollTitleToday.setStyle("""
-			    -fx-background-color: blue;
+			    -fx-background-color: transparent;
 			    -fx-background: transparent;
 			""");
 
@@ -101,15 +106,16 @@ public class GuiCore extends Application {
 		StackPane.setMargin(rightButton, new Insets(0, 20, 0, 0));
 		overlayPane.setMaxHeight(625);
 		overlayPane.setStyle("""
-				-fx-background-color: green;
+				-fx-background-color: transparent;
 				-fx-background: transparent;
 		""");
 
 
 		borderPane_root.setCenter(overlayPane);
+		borderPane_root.setMargin(overlayPane, new Insets(0, 4, 0, 4));
 		borderPane_root.setBottom(stackPane_bot_panel);
 		borderPane_root.setAlignment(stackPane_bot_panel, Pos.BOTTOM_CENTER);
-		borderPane_root.setMargin(stackPane_bot_panel, new Insets(10));
+		borderPane_root.setMargin(stackPane_bot_panel, new Insets(15));
 
 		leftButton.setOnAction(e -> scrollLeft());
 		rightButton.setOnAction(e -> scrollRight());
@@ -141,7 +147,7 @@ public class GuiCore extends Application {
 	        String response = client.getOngoing();
 	        JsonNode rootNode = mapper.readTree(response).path("response");
 	        for (JsonNode data : rootNode) {
-	            String img = "https:" + data.path("poster").path("fullsize").asText();
+	            String img = "https:" + data.path("poster").path("big").asText();// fullsize 
 	            String name = data.path("title").asText();
 	            String desc = data.path("description").asText("None");
 	            double ratingDoub = data.path("rating").path("average").asDouble(0);
