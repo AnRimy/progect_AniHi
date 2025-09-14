@@ -11,6 +11,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
@@ -21,16 +22,48 @@ import javafx.stage.Stage;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 
-public class WinTitle extends Stage{
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.paint.Color;
+import javafx.geometry.Insets;
+import javafx.scene.layout.CornerRadii;
+
+public class WinTitle extends Stage{	
+	private Image image;
+	private String name;
+	private String desc;
+	private JsonNode data;
+	private BorderPane root;
+
 	public WinTitle(Image image, String name, String desc, JsonNode data){
+		this.image = image;
+		this.name = name;
+		this.desc = desc;
+		this.data = data;
+	}
+		
+	public BorderPane createWin() {
+		BorderPane pp = new BorderPane();
+		pp.setStyle("-fx-background-color: white;");
+		BorderPane root = new BorderPane();
+//		root.setMinSize(1920, 1080);
+		root.setStyle("-fx-background-color: white;");
+		
+        Button closeBtn = new Button("Закрыть");
+        closeBtn.setMinSize(100, 200);
+        closeBtn.setStyle("""
+            -fx-background-color: #e74c3c;
+            -fx-text-fill: white;
+            -fx-font-weight: bold;
+            -fx-padding: 10px 20px;
+        """);
+        closeBtn.setOnAction(e -> hideWin());
+		
 		setTitle(name);
 		ArrayList<Integer> series = new ArrayList<>();
 		for (int i = 1; i <= 55; i++) {
 		    series.add(i);
 		}
-		
-		BorderPane root = new BorderPane();
-		root.setStyle("fx-background-color: black");
 		
 		ImageView img = new ImageView(image);
 		
@@ -75,15 +108,19 @@ public class WinTitle extends Stage{
 		hbox_serPlayer.getChildren().addAll(scrollSeries, label_video);
 		
 		root.setLeft(img);
+		root.setBottom(closeBtn);
 		root.setRight(label_name);
-		root.setBottom(label_desc);
+//		root.setBottom(label_desc);
 		root.setCenter(hbox_serPlayer);
 		root.setTop(label_genres);
 		
-		Scene scene = new Scene(root, 1920,  1080);
-		setScene(scene);
+		pp.setCenter(root);
+		return pp;
 	}
 	
+	private void hideWin() {
+		root.setVisible(false);
+	}
 	
 	public String getRealVideoUrl(String iframeUrl) {
 	    try {

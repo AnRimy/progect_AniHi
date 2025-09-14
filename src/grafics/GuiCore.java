@@ -28,6 +28,7 @@ import mainLogic.Core;
 import mainLogic.Config;
 
 public class GuiCore extends Application {
+	private BorderPane borderPane_root;
 	private HBox hBox_titleToday;
 	private ScrollPane scrollTitleToday;
 
@@ -36,6 +37,10 @@ public class GuiCore extends Application {
 		Button button_mainMenu = new Button("Main");
 		button_mainMenu.setPrefSize(50, 50);
 		button_mainMenu.setStyle("-fx-background-radius: 25px");
+		
+		Button button_schedule = new Button("Schedule");
+		button_schedule.setPrefSize(50, 50);
+		button_schedule.setStyle("-fx-background-radius: 25px");
 		
 		// search widgets
 		StackPane sp_search = new StackPane();
@@ -62,7 +67,7 @@ public class GuiCore extends Application {
 		sp_search.setAlignment(button_search, Pos.CENTER_RIGHT);
 		
 		
-		BorderPane borderPane_root = new BorderPane();
+		borderPane_root = new BorderPane();
 		borderPane_root.setStyle("""
 			    -fx-background-color: linear-gradient(to bottom, #e74c3c, #e67e22);
 			    -fx-background-radius: 10px;
@@ -72,7 +77,7 @@ public class GuiCore extends Application {
 		HBox stackPane_bot_panel = new HBox(20);
 		stackPane_bot_panel.setMaxWidth(500);
 		stackPane_bot_panel.setMinHeight(60);
-		stackPane_bot_panel.getChildren().addAll(button_mainMenu);
+		stackPane_bot_panel.getChildren().addAll(button_mainMenu, button_schedule);
 		stackPane_bot_panel.setAlignment(Pos.CENTER);
 		stackPane_bot_panel.setStyle("-fx-background-color: rgba(155, 155, 155, 0.5);"
 				+ "-fx-border-radius: 30px;"
@@ -100,7 +105,7 @@ public class GuiCore extends Application {
 		hBox_titleToday.setPadding(new Insets(0, 50, 0, 50));
 		hBox_titleToday.setAlignment(Pos.CENTER_LEFT);
 		hBox_titleToday.setStyle("""
-			    -fx-background-color: rgba(155, 155, 0, 0.2);
+				-fx-background-color: transparent;
 			    -fx-background: transparent;
 			""");
 
@@ -282,9 +287,10 @@ public class GuiCore extends Application {
 	    }
 	}
 	
-	private static void openDetailWindow(Image image, String name, String desc, JsonNode data) {
+	private void openDetailWindow(Image image, String name, String desc, JsonNode data) {
 		WinTitle win = new WinTitle(image, name, desc, data);
-		win.show();
+		BorderPane winTitle = win.createWin();
+		borderPane_root.getChildren().add(winTitle);
 	}
 
 	public static void showGUI() {
