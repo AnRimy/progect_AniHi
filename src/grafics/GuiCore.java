@@ -37,7 +37,6 @@ public class GuiCore extends Application {
 		Button button_mainMenu = new Button("Main");
 		button_mainMenu.setPrefSize(50, 50);
 		button_mainMenu.setStyle("-fx-background-radius: 25px");
-		
 		Button button_schedule = new Button("Schedule");
 		button_schedule.setPrefSize(50, 50);
 		button_schedule.setStyle("-fx-background-radius: 25px");
@@ -291,6 +290,11 @@ public class GuiCore extends Application {
 		WinTitle win = new WinTitle(image, name, desc, data);
 		BorderPane winTitle = win.createWin();
 		borderPane_root.getChildren().add(winTitle);
+	}
+	
+	private void openScheduleWindow() {
+		WinSchedule winSchedule = new WinSchedule();
+		
 	}
 
 	public static void showGUI() {
