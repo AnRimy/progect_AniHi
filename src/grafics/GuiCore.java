@@ -175,6 +175,7 @@ public class GuiCore extends Application {
 	        JsonNode rootNode = mapper.readTree(response).path("response");
 	        for (JsonNode data : rootNode) {
 	            String img = "https:" + data.path("poster").path("fullsize").asText();// fullsize 
+	            int id = data.path("anime_id").asInt();
 	            String name = data.path("title").asText();
 	            String desc = data.path("description").asText("None");
 	            double ratingDoub = data.path("rating").path("average").asDouble(0);
@@ -276,7 +277,7 @@ public class GuiCore extends Application {
 	            button.setGraphic(mainButtonContainer);
 	            button.setContentDisplay(ContentDisplay.CENTER);
 
-	            button.setOnAction(e -> openDetailWindow(sharpImageView.getImage(), name, desc, data));
+	            button.setOnAction(e -> openDetailWindow(sharpImageView.getImage(), name, id, desc, data, client));
 	            hBox_titleToday.getChildren().add(button);
 	        }
 	    } catch (Exception e) {
@@ -286,8 +287,8 @@ public class GuiCore extends Application {
 	    }
 	}
 	
-	private void openDetailWindow(Image image, String name, String desc, JsonNode data) {
-		WinTitle win = new WinTitle(image, name, desc, data);
+	private void openDetailWindow(Image image, String name, int id, String desc, JsonNode data, Core client) {
+		WinTitle win = new WinTitle(image, name, id, desc, data, client);
 		BorderPane winTitle = win.createWin();
 		borderPane_root.getChildren().add(winTitle);
 	}

@@ -1,54 +1,70 @@
 package grafics;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
-import javafx.application.Platform;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
-import javafx.scene.media.MediaView;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.ScrollPane.ScrollBarPolicy;
-import javafx.scene.effect.GaussianBlur;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import mainLogic.Core;
 
 public class WinTitle extends Stage {    
     private Image image;
     private String name;
+    private int id;
     private String desc;
     private JsonNode data;
-    private BorderPane root;
-    private MediaPlayer mediaPlayer;
+    private Core client;
+    private WebView webView;
+    private ArrayList<String> episodeUrls = new ArrayList<>();
+    private Map<String, Map<String, List<JsonNode>>> dubbingPlayerEpisodesMap = new TreeMap<>();
+    private String currentDubbing = "";
+    private String currentPlayer = "";
+    private VBox seriesContainer;
+    private ComboBox<String> dubbingComboBox;
+    private ComboBox<String> playerComboBox;
+    private HBox filterPanel;
 
-    public WinTitle(Image image, String name, String desc, JsonNode data){
+    public WinTitle(Image image, String name, int id, String desc, JsonNode data, Core client){
         this.image = image;
         this.name = name;
+        this.id = id;
         this.desc = desc;
         this.data = data;
+        this.client = client;
     }
         
     public BorderPane createWin() {
         BorderPane root = new BorderPane();
-        root.setMinSize(1920, 1080);
-        
+              
         StackPane mainContainer = new StackPane();
     
+        // background effect
         Rectangle blurBackground = new Rectangle(1920, 1080);
         blurBackground.setFill(Color.rgb(100, 100, 100, 0.1));
         GaussianBlur blur = new GaussianBlur(50);
@@ -56,47 +72,36 @@ public class WinTitle extends Stage {
         
         Rectangle darkOverlay = new Rectangle(1920, 1080);
         darkOverlay.setFill(Color.rgb(0, 0, 0, 0.7));
-        darkOverlay.setArcHeight(20);
-        darkOverlay.setArcWidth(20);
         
         BorderPane contentPane = new BorderPane();
         contentPane.setMaxSize(1600, 900);
-        contentPane.setStyle("""
-            -fx-background-color: rgba(30, 30, 40, 0.95);
-            -fx-background-radius: 20;
-            -fx-border-radius: 20;
-            -fx-border-color: rgba(255, 255, 255, 0.1);
-            -fx-border-width: 1;
-            -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 20, 0, 0, 5);
-        """);
+        contentPane.setStyle("-fx-background-color: rgba(30, 30, 40, 0.95); -fx-background-radius: 20px; -fx-border-radius: 20px;");
         
-        // top panel
+        // top content
         HBox topPanel = new HBox(10);
         topPanel.setAlignment(Pos.CENTER_RIGHT);
         topPanel.setPadding(new Insets(20));
-        topPanel.setStyle("-fx-background-color: linear-gradient(to right, rgba(25, 25, 35, 0.9), rgba(35, 35, 45, 0.9));");
+        topPanel.setStyle("-fx-background-color: rgba(25, 25, 35, 0.9); -fx-background-radius: 20px; -fx-border-radius: 20px;");
         
         Label titleLabel = new Label(name);
         titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 28));
         titleLabel.setTextFill(Color.WHITE);
-        titleLabel.setStyle("-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 10, 0, 0, 2);");
         
         HBox.setHgrow(titleLabel, Priority.ALWAYS);
         
         Button closeBtn = new Button("✕");
         closeBtn.setStyle("""
-            -fx-background-color: #e74c3c;
-            -fx-text-fill: white;
-            -fx-font-weight: bold;
-            -fx-font-size: 16px;
-            -fx-min-width: 40px;
-            -fx-min-height: 40px;
-            -fx-background-radius: 20;
-            -fx-border-radius: 20;
-            -fx-cursor: hand;
-        """);
-        closeBtn.setOnMouseEntered(e -> closeBtn.setStyle(closeBtn.getStyle() + "-fx-background-color: #c0392b;"));
-        closeBtn.setOnMouseExited(e -> closeBtn.setStyle(closeBtn.getStyle() + "-fx-background-color: #e74c3c;"));
+                -fx-background-color: #e74c3c;
+                -fx-text-fill: white;
+                -fx-font-weight: bold;
+                -fx-font-size: 16px;
+                -fx-min-width: 40px;
+                -fx-min-height: 40px;
+                -fx-background-radius: 20px;
+                -fx-border-radius: 20px;
+                -fx-cursor: hand;
+            """);
+        closeBtn.setOnAction(e -> closeWindow(root));
         
         topPanel.getChildren().addAll(titleLabel, closeBtn);
         
@@ -108,229 +113,346 @@ public class WinTitle extends Stage {
         VBox infoPanel = new VBox(15);
         infoPanel.setMaxWidth(300);
         infoPanel.setPadding(new Insets(15));
-        infoPanel.setStyle("""
-            -fx-background-color: rgba(40, 40, 50, 0.8);
-            -fx-background-radius: 15;
-            -fx-border-radius: 15;
-        """);
+        infoPanel.setStyle("-fx-background-color: rgba(40, 40, 50, 0.8); -fx-background-radius: 20px;");
         
-        // poster
         ImageView poster = new ImageView(image);
         poster.setFitWidth(250);
         poster.setFitHeight(350);
         poster.setPreserveRatio(true);
-        poster.setStyle("""
-            -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 15, 0, 0, 3);
-            -fx-background-radius: 10;
-        """);
         
         // genres
         String genres = "";
         JsonNode nodeGenres = data.path("genres");
         if (nodeGenres.isArray()) {
             for(JsonNode genre: nodeGenres)
-                genres += (genre.path("title").asText("None")) + " ";
+                genres += genre.path("title").asText("None") + " ";
         }
         
         Label genresLabel = new Label("Жанры: " + genres);
-        genresLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 14));
+        genresLabel.setFont(Font.font("Arial", 14));
         genresLabel.setTextFill(Color.LIGHTGRAY);
         genresLabel.setWrapText(true);
-        genresLabel.setMaxWidth(250);
         
-        // description
         Label descLabel = new Label(desc);
-        descLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 14));
+        descLabel.setFont(Font.font("Arial", 14));
         descLabel.setTextFill(Color.WHITE);
         descLabel.setWrapText(true);
-        descLabel.setMaxWidth(250);
-        descLabel.setTextAlignment(TextAlignment.JUSTIFY);
         
         infoPanel.getChildren().addAll(poster, genresLabel, descLabel);
         
-        // video player and choose series
         VBox videoPanel = new VBox(15);
         videoPanel.setAlignment(Pos.TOP_CENTER);
         
-        // video player container
+        // player
         StackPane videoPlayerContainer = new StackPane();
         videoPlayerContainer.setMinSize(900, 500);
-        videoPlayerContainer.setStyle("""
-            -fx-background-color: rgba(0, 0, 0, 0.9);
-            -fx-background-radius: 10;
-            -fx-border-radius: 10;
-            -fx-border-color: rgba(255, 255, 255, 0.1);
-        """);
+        videoPlayerContainer.setStyle("-fx-background-color: rgba(0, 0, 0, 0.9); -fx-background-radius: 20px; -fx-border-radius: 20px");
         
-        // placeholder label
-        Label videoPlaceholder = new Label("Выберите серию для просмотра");
-        videoPlaceholder.setTextFill(Color.GRAY);
-        videoPlaceholder.setFont(Font.font("Arial", FontWeight.NORMAL, 16));
+        webView = new WebView();
+        webView.setPrefSize(900, 500);
         
-        // MediaView
-        MediaView mediaView = new MediaView();
-        mediaView.setFitWidth(800);
-        mediaView.setFitHeight(450);
-        mediaView.setPreserveRatio(true);
-        mediaView.setVisible(false);
-        videoPlayerContainer.getChildren().addAll(videoPlaceholder, mediaView);
+        videoPlayerContainer.getChildren().add(webView);
         
-        // series container
-        VBox seriesContainer = new VBox(8);
+        seriesContainer = new VBox(8);
         seriesContainer.setPadding(new Insets(10));
-        seriesContainer.setStyle("-fx-background-color: rgba(35, 35, 45, 0.8); -fx-background-radius: 10;");
+        seriesContainer.setStyle("-fx-background-color: rgba(35, 35, 45, 0.8); -fx-background-radius: 20px; -fx-border-radius: 20px");
         
-        ArrayList<Integer> series = new ArrayList<>();
-        for (int i = 1; i <= 55; i++) {
-            series.add(i);
-        }
+        loadEpisodesData(seriesContainer);
         
-        for(int s: series) {
-            Button episodeBtn = new Button("Серия " + s);
-            episodeBtn.setStyle("""
-                -fx-background-color: rgba(60, 60, 80, 0.8);
-                -fx-text-fill: white;
-                -fx-font-size: 12px;
-                -fx-background-radius: 5;
-                -fx-border-radius: 5;
-                -fx-cursor: hand;
-                -fx-padding: 8 15;
-            """);
-            episodeBtn.setOnMouseEntered(e -> episodeBtn.setStyle("""
-                -fx-background-color: rgba(80, 80, 100, 0.9);
-                -fx-text-fill: white;
-                -fx-font-size: 12px;
-                -fx-background-radius: 5;
-                -fx-border-radius: 5;
-                -fx-cursor: hand;
-                -fx-padding: 8 15;
-            """));
-            episodeBtn.setOnMouseExited(e -> episodeBtn.setStyle("""
-                -fx-background-color: rgba(60, 60, 80, 0.8);
-                -fx-text-fill: white;
-                -fx-font-size: 12px;
-                -fx-background-radius: 5;
-                -fx-border-radius: 5;
-                -fx-cursor: hand;
-                -fx-padding: 8 15;
-            """));
-            
-            // Обработчик выбора серии
-            episodeBtn.setOnAction(e -> {
-                loadVideoForEpisode(s, mediaView, videoPlaceholder);
-            });
-            
-            seriesContainer.getChildren().add(episodeBtn);
-        }
-        
+        //scroll for series
         ScrollPane seriesScroll = new ScrollPane(seriesContainer);
         seriesScroll.setPrefHeight(400);
         seriesScroll.setFitToWidth(true);
-        seriesScroll.setHbarPolicy(ScrollBarPolicy.NEVER);
-        seriesScroll.setStyle("""
-            -fx-background-color: transparent;
-            -fx-background: transparent;
-            -fx-border-color: transparent;
-        """);
         
+        // constract
         videoPanel.getChildren().addAll(videoPlayerContainer, seriesScroll);
-        
         centerContent.getChildren().addAll(infoPanel, videoPanel);
-        
         contentPane.setTop(topPanel);
         contentPane.setCenter(centerContent);
-        
         mainContainer.getChildren().addAll(blurBackground, darkOverlay, contentPane);
         root.setCenter(mainContainer);
         
-        // Close action
-        closeBtn.setOnAction(e -> {
-            if (mediaPlayer != null) {
-                mediaPlayer.stop();
-                mediaPlayer.dispose();
-            }
-            Node source = (Node) e.getSource();
-            Scene scene = source.getScene();
-            
-            if (scene != null) {
-                Parent rootParent = scene.getRoot();
-                if (rootParent instanceof BorderPane) {
-                    BorderPane mainRoot = (BorderPane) rootParent;
-                    mainRoot.getChildren().remove(root);
-                }
-            }
-        });
-       
         return root;
     }
     
-    private void loadVideoForEpisode(int episode, MediaView mediaView, Label placeholder) {
-        try {
-            if (mediaPlayer != null) {
-                mediaPlayer.stop();
-                mediaPlayer.dispose();
+    private HBox createFilterPanel() {
+        filterPanel = new HBox(15);
+        filterPanel.setAlignment(Pos.CENTER_LEFT);
+        filterPanel.setPadding(new Insets(10));
+        filterPanel.setStyle("-fx-background-color: rgba(45, 45, 55, 0.8); -fx-background-radius: 10px;");
+        
+        // box sub
+        Label dubbingLabel = new Label("Озвучка:");
+        dubbingLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        dubbingLabel.setTextFill(Color.WHITE);
+        
+        dubbingComboBox = new ComboBox<>();
+        dubbingComboBox.setStyle("""
+            -fx-background-color: rgba(60, 60, 80, 0.8);
+            -fx-text-fill: white;
+            -fx-pref-width: 200px;
+        """);
+        
+        // box player
+        Label playerLabel = new Label("Плеер:");
+        playerLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        playerLabel.setTextFill(Color.WHITE);
+        
+        playerComboBox = new ComboBox<>();
+        playerComboBox.setStyle("""
+            -fx-background-color: rgba(60, 60, 80, 0.8);
+            -fx-text-fill: white;
+            -fx-pref-width: 150px;
+        """);
+        
+        dubbingComboBox.getItems().addAll(dubbingPlayerEpisodesMap.keySet());
+        
+        if (!dubbingPlayerEpisodesMap.isEmpty()) {
+            String firstDubbing = dubbingPlayerEpisodesMap.keySet().iterator().next();
+            dubbingComboBox.setValue(firstDubbing);
+            currentDubbing = firstDubbing;
+            
+            updatePlayerComboBox();
+        }
+        
+        // action
+        dubbingComboBox.setOnAction(e -> {
+            String selectedDubbing = dubbingComboBox.getValue();
+            if (selectedDubbing != null && !selectedDubbing.equals(currentDubbing)) {
+                currentDubbing = selectedDubbing;
+                updatePlayerComboBox();
+                updateEpisodesList();
             }
+        });
+        
+        playerComboBox.setOnAction(e -> {
+            String selectedPlayer = playerComboBox.getValue();
+            if (selectedPlayer != null && !selectedPlayer.equals(currentPlayer)) {
+                currentPlayer = selectedPlayer;
+                updateEpisodesList();
+            }
+        });
+        
+        filterPanel.getChildren().addAll(dubbingLabel, dubbingComboBox, playerLabel, playerComboBox);
+        return filterPanel;
+    }
+    
+    private void updatePlayerComboBox() {
+        playerComboBox.getItems().clear();
+        
+        if (dubbingPlayerEpisodesMap.containsKey(currentDubbing)) {
+            Map<String, List<JsonNode>> playersMap = dubbingPlayerEpisodesMap.get(currentDubbing);
+            playerComboBox.getItems().addAll(playersMap.keySet());
             
-            String videoUrl = getVideoUrlForEpisode(episode);
+            if (!playersMap.isEmpty()) {
+                String firstPlayer = playersMap.keySet().iterator().next();
+                playerComboBox.setValue(firstPlayer);
+                currentPlayer = firstPlayer;
+            }
+        }
+    }
+    
+    private void loadEpisodesData(VBox container) {
+        this.seriesContainer = container;
+        
+        try {
+            String response = client.getSeriasAnime(id);
+            JsonNode rootNode = new ObjectMapper().readTree(response).path("response");
             
-            if (videoUrl == null || videoUrl.isEmpty()) {
-                placeholder.setText("Видео для серии " + episode + " не найдено");
-                placeholder.setVisible(true);
-                mediaView.setVisible(false);
+            if (rootNode.isEmpty()) {
+                Label noEpisodesLabel = new Label("Эпизоды не найдены");
+                noEpisodesLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
+                container.getChildren().add(noEpisodesLabel);
                 return;
             }
             
-            Media media = new Media(videoUrl);
-            mediaPlayer = new MediaPlayer(media);
-            mediaView.setMediaPlayer(mediaPlayer);
-            
-            mediaPlayer.setOnReady(() -> {
-                placeholder.setVisible(false);
-                mediaView.setVisible(true);
-                mediaPlayer.play();
-            });
-            
-            mediaPlayer.setOnError(() -> {
-                placeholder.setText("Ошибка загрузки видео: " + mediaPlayer.getError().getMessage());
-                placeholder.setVisible(true);
-                mediaView.setVisible(false);
-            });
-            
-        } catch (Exception e) {
-            placeholder.setText("Ошибка: " + e.getMessage());
-            placeholder.setVisible(true);
-            mediaView.setVisible(false);
-        }
-    }
-    
-    private String getVideoUrlForEpisode(int episode) {
-        if (episode == 1) {
-            return "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
-        }
-        
-        return null;
-    }
-    
-    public String getRealVideoUrl(String iframeUrl) {
-        try {
-            String fullUrl = iframeUrl.startsWith("//") ? "https:" + iframeUrl : iframeUrl;
-            
-            HttpURLConnection connection = (HttpURLConnection) new URL(fullUrl).openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0");
-            connection.setInstanceFollowRedirects(false);
-            
-            int responseCode = connection.getResponseCode();
-            
-            if (responseCode == HttpURLConnection.HTTP_MOVED_PERM || 
-                responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
-                String realUrl = connection.getHeaderField("Location");
-                return realUrl != null ? realUrl : fullUrl;
+            // groups sub and player
+            for(JsonNode video : rootNode) {
+                String dubbing = video.path("data").path("dubbing").asText("Неизвестно");
+                String player = video.path("data").path("player").asText("Неизвестно");
+                
+                if (!dubbingPlayerEpisodesMap.containsKey(dubbing)) {
+                    dubbingPlayerEpisodesMap.put(dubbing, new TreeMap<>());
+                }
+                
+                Map<String, List<JsonNode>> playersMap = dubbingPlayerEpisodesMap.get(dubbing);
+                if (!playersMap.containsKey(player)) {
+                    playersMap.put(player, new ArrayList<>());
+                }
+                
+                playersMap.get(player).add(video);
             }
             
-            return fullUrl;
+            if (!dubbingPlayerEpisodesMap.isEmpty()) {
+                container.getChildren().add(createFilterPanel());
+            }
+            
+            if (!dubbingPlayerEpisodesMap.isEmpty()) {
+                currentDubbing = dubbingPlayerEpisodesMap.keySet().iterator().next();
+                Map<String, List<JsonNode>> playersMap = dubbingPlayerEpisodesMap.get(currentDubbing);
+                if (!playersMap.isEmpty()) {
+                    currentPlayer = playersMap.keySet().iterator().next();
+                    updateEpisodesList();
+                }
+            }
+            
         } catch (Exception e) {
-            return iframeUrl;
+            e.printStackTrace();
+            Label errorLabel = new Label("Ошибка загрузки эпизодов");
+            errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
+            container.getChildren().add(errorLabel);
+        }
+    }
+    
+    private void updateEpisodesList() {
+        // Очищаем контейнер от старых эпизодов (сохраняем панель фильтров)
+        List<Node> nodesToRemove = new ArrayList<>();
+        for (Node node : seriesContainer.getChildren()) {
+            if (node instanceof Button || (node instanceof Label && !(node.getParent() instanceof HBox))) {
+                nodesToRemove.add(node);
+            }
+        }
+        seriesContainer.getChildren().removeAll(nodesToRemove);
+        
+        if (dubbingPlayerEpisodesMap.containsKey(currentDubbing)) {
+            Map<String, List<JsonNode>> playersMap = dubbingPlayerEpisodesMap.get(currentDubbing);
+            
+            if (playersMap.containsKey(currentPlayer)) {
+                List<JsonNode> episodes = playersMap.get(currentPlayer);
+                
+                if (episodes != null && !episodes.isEmpty()) {
+                    episodes.sort((e1, e2) -> {
+                        int num1 = e1.path("number").asInt();
+                        int num2 = e2.path("number").asInt();
+                        return Integer.compare(num1, num2);
+                    });
+                    
+                    for (JsonNode video : episodes) {
+                        String iframeUrl = video.path("iframe_url").asText();
+                        if (!iframeUrl.equals("None")) {
+                            String fullUrl = iframeUrl.startsWith("//") ? "https:" + iframeUrl : iframeUrl;
+                            
+                            int episodeNumber = video.path("number").asInt();
+                            String playerName = video.path("data").path("player").asText();
+                            String dubbingName = video.path("data").path("dubbing").asText();
+                            
+                            Button episodeBtn = createEpisodeButton(episodeNumber, fullUrl, playerName, dubbingName);
+                            seriesContainer.getChildren().add(episodeBtn);
+                        }
+                    }
+                } else {
+                    addNoEpisodesLabel();
+                }
+            } else {
+                addNoEpisodesLabel();
+            }
+        } else {
+            addNoEpisodesLabel();
+        }
+    }
+    
+    private void addNoEpisodesLabel() {
+        Label noEpisodesLabel = new Label("Нет эпизодов для выбранных фильтров");
+        noEpisodesLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
+        seriesContainer.getChildren().add(noEpisodesLabel);
+    }
+    
+    private Button createEpisodeButton(int episodeNumber, String videoUrl, String playerName, String dubbingName) {
+        Button episodeBtn = new Button(String.format("Серия %d\n%s • %s", episodeNumber, playerName, dubbingName));
+        episodeBtn.setStyle("""
+            -fx-background-color: rgba(60, 60, 80, 0.8);
+            -fx-text-fill: white;
+            -fx-cursor: hand;
+            -fx-padding: 10 15;
+            -fx-alignment: center-left;
+            -fx-min-width: 250px;
+            -fx-min-height: 50px;
+            -fx-font-size: 12px;
+        """);
+        
+        episodeBtn.setOnMouseEntered(e -> {
+            episodeBtn.setStyle("""
+                -fx-background-color: rgba(80, 80, 100, 0.9);
+                -fx-text-fill: white;
+                -fx-cursor: hand;
+                -fx-padding: 10 15;
+                -fx-alignment: center-left;
+                -fx-min-width: 250px;
+                -fx-min-height: 50px;
+                -fx-font-size: 12px;
+            """);
+        });
+        
+        episodeBtn.setOnMouseExited(e -> {
+            episodeBtn.setStyle("""
+                -fx-background-color: rgba(60, 60, 80, 0.8);
+                -fx-text-fill: white;
+                -fx-cursor: hand;
+                -fx-padding: 10 15;
+                -fx-alignment: center-left;
+                -fx-min-width: 250px;
+                -fx-min-height: 50px;
+                -fx-font-size: 12px;
+            """);
+        });
+        
+        episodeBtn.setOnAction(e -> loadVideoInWebView(videoUrl));
+        
+        return episodeBtn;
+    }
+    
+    private void loadVideoInWebView(String videoUrl) {
+        String htmlContent = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <style>
+                    body, html {
+                        margin: 0;
+                        padding: 0;
+                        width: 100%;
+                        height: 100%;
+                        overflow: hidden;
+                        background: #000;
+                    }
+                    .container {
+                        width: 100%;
+                        height: 100%;
+                    }
+                    iframe {
+                        width: 100%;
+                        height: 100%;
+                        border: none;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <iframe src=""" + videoUrl + """
+                        allowfullscreen
+                        allow="autoplay; encrypted-media"
+                        scrolling="no">
+                    </iframe>
+                </div>
+            </body>
+            </html>
+        """;
+        
+        webView.getEngine().loadContent(htmlContent);
+    }
+    
+    private void closeWindow(BorderPane root) {
+        if (webView != null) {
+            webView.getEngine().load(null);
+        }
+        
+        Scene scene = root.getScene();
+        if (scene != null) {
+            Parent rootParent = scene.getRoot();
+            if (rootParent instanceof BorderPane) {
+                ((BorderPane) rootParent).getChildren().remove(root);
+            }
         }
     }
 }

@@ -15,6 +15,9 @@ module animeGUI {
     requires javafx.graphics;
 	requires javafx.controls;
 	requires javafx.media;
+	requires javafx.web;
+	requires java.desktop;
+	
 	
 	exports grafics;
 	exports mainLogic;

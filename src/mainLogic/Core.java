@@ -26,7 +26,8 @@ public class Core {
     	HttpRequest requests = HttpRequest.newBuilder()
     			.uri(URI.create(url))
 	            .header("X-Application", apiKey)
-	            .header("Accept", "image/avif,image/webp")
+	            .header("Accept", "application/json")
+//	            .header("Accept", "image/avif,image/webp")
 	            .GET()
 	            .build();
     	return requests;
@@ -101,6 +102,15 @@ public class Core {
     
     public String getOngoing() throws Exception{
     	themeParam = "anime?status=ongoing&sort_forward=true&sort=top&offset=0&limit=20";
+    	String url = String.format("%s/%s", baseUrl, themeParam);
+    	HttpResponse<String> response = client.send(requests(url), HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) 
+            throw new RuntimeException("API request failed: " + response.statusCode());
+    	return response.body();
+    }
+    
+    public String getSeriasAnime(int id) throws Exception{
+    	themeParam = String.format("anime/%d/videos", id);
     	String url = String.format("%s/%s", baseUrl, themeParam);
     	HttpResponse<String> response = client.send(requests(url), HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) 
