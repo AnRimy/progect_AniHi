@@ -305,7 +305,6 @@ public class WinTitle extends Stage {
     }
     
     private void updateEpisodesList() {
-        // Очищаем контейнер от старых эпизодов (сохраняем панель фильтров)
         List<Node> nodesToRemove = new ArrayList<>();
         for (Node node : seriesContainer.getChildren()) {
             if (node instanceof Button || (node instanceof Label && !(node.getParent() instanceof HBox))) {

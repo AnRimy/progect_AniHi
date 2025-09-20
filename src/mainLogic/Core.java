@@ -1,7 +1,9 @@
 package mainLogic;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.*;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
@@ -116,6 +118,15 @@ public class Core {
         if (response.statusCode() != 200) 
             throw new RuntimeException("API request failed: " + response.statusCode());
     	return response.body();
+    }
+    
+    public String searchAnime(String name) throws Exception {
+        String encodedName = java.net.URLEncoder.encode(name, StandardCharsets.UTF_8.toString());
+        String url = String.format("%s/search?q=%s&offset=0&limit=5", baseUrl, encodedName);
+        HttpResponse<String> response = client.send(requests(url), HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) 
+            throw new RuntimeException("API request failed: " + response.statusCode());
+        return response.body();
     }
 }
 
