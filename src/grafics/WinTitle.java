@@ -34,11 +34,11 @@ import javafx.stage.Stage;
 import mainLogic.Core;
 
 public class WinTitle extends Stage {    
-    private Image image;
+    private String image;
     private String name;
     private int id;
     private String desc;
-    private JsonNode data;
+    private JsonNode Jgenres;
     private Core client;
     private WebView webView;
     private ArrayList<String> episodeUrls = new ArrayList<>();
@@ -50,13 +50,23 @@ public class WinTitle extends Stage {
     private ComboBox<String> playerComboBox;
     private HBox filterPanel;
 
-    public WinTitle(Image image, String name, int id, String desc, JsonNode data, Core client){
-        this.image = image;
-        this.name = name;
-        this.id = id;
-        this.desc = desc;
-        this.data = data;
-        this.client = client;
+    public WinTitle(int id, Core client){
+    	this.client = client;
+    	this.id = id;
+    	ObjectMapper mapper = new ObjectMapper();
+    	    	
+		try {
+			String response = client.searchAnimeId(id, false);
+			JsonNode data = new ObjectMapper().readTree(response).path("response");
+	        this.image = "https:" + data.path("poster").path("fullsize").asText();
+	        this.name = data.path("title").asText();
+	        this.desc = data.path("description").asText();
+	        this.Jgenres = data.path("genres");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
     }
         
     public BorderPane createWin() {
@@ -122,9 +132,8 @@ public class WinTitle extends Stage {
         
         // genres
         String genres = "";
-        JsonNode nodeGenres = data.path("genres");
-        if (nodeGenres.isArray()) {
-            for(JsonNode genre: nodeGenres)
+        if (Jgenres.isArray()) {
+            for(JsonNode genre: Jgenres)
                 genres += genre.path("title").asText("None") + " ";
         }
         

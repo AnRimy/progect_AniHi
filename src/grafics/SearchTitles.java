@@ -21,20 +21,22 @@ import javafx.scene.text.FontWeight;
 import mainLogic.Core;
 
 public class SearchTitles {
+    private static Core client;
+    private static BorderPane parent;
     
     public static void scanning(String name, BorderPane parent, Core client) {
+    	SearchTitles.client = client;
+    	SearchTitles.parent = parent;
         ObjectMapper mapper = new ObjectMapper();
         
         try {
-            String response = client.searchAnime(name);
+            String response = client.searchAnimeName(name);
             JsonNode rootNode = mapper.readTree(response).path("response");
             
-            // Создаем контейнер для результатов
             VBox resultsContainer = new VBox(20);
             resultsContainer.setPadding(new Insets(20));
             resultsContainer.setStyle("-fx-background-color: #2d2d2d;");
             
-            // Заголовок результатов с кнопкой закрытия
             HBox headerBox = new HBox();
             headerBox.setAlignment(Pos.CENTER_LEFT);
             headerBox.setPadding(new Insets(0, 0, 20, 0));
@@ -44,12 +46,11 @@ public class SearchTitles {
             titleLabel.setTextFill(Color.WHITE);
             HBox.setHgrow(titleLabel, Priority.ALWAYS);
             
-            // Кнопка закрытия
             Button closeButton = new Button("✕");
             closeButton.setStyle("-fx-background-color: #ff4444; -fx-text-fill: white; -fx-font-weight: bold; " +
                                "-fx-background-radius: 15; -fx-min-width: 30; -fx-min-height: 30;");
             closeButton.setOnAction(e -> {
-                parent.setRight(null); // Убираем панель поиска
+                parent.setRight(null);
             });
             
             headerBox.getChildren().addAll(titleLabel, closeButton);
@@ -65,7 +66,6 @@ public class SearchTitles {
                 resultsContainer.getChildren().add(noResults);
             }
             
-            // Создаем ScrollPane для прокрутки
             ScrollPane scrollPane = new ScrollPane(resultsContainer);
             scrollPane.setFitToWidth(true);
             scrollPane.setStyle("-fx-background: #2d2d2d; -fx-border-color: #2d2d2d;");
@@ -75,7 +75,6 @@ public class SearchTitles {
             mainContainer.setPadding(new Insets(10));
             mainContainer.setStyle("-fx-background-color: #2d2d2d;");
             
-            // Устанавливаем максимальную ширину для панели поиска
             mainContainer.setMaxWidth(500);
             mainContainer.setMinWidth(400);
             
@@ -90,7 +89,6 @@ public class SearchTitles {
             errorContainer.setAlignment(Pos.CENTER);
             errorContainer.getChildren().add(errorLabel);
             
-            // Добавляем кнопку закрытия и для ошибки
             Button closeButton = new Button("✕");
             closeButton.setStyle("-fx-background-color: #ff4444; -fx-text-fill: white; -fx-font-weight: bold; " +
                                "-fx-background-radius: 15; -fx-min-width: 30; -fx-min-height: 30;");
@@ -113,6 +111,7 @@ public class SearchTitles {
         card.setAlignment(Pos.TOP_LEFT);
         card.setPadding(new Insets(15));
         card.setStyle("-fx-background-color: #3d3d3d; -fx-background-radius: 10; -fx-border-radius: 10;");
+        
         
         // poster
         ImageView posterView = createPoster(animeNode.path("poster").path("medium").asText());
@@ -165,6 +164,8 @@ public class SearchTitles {
         card.setOnMouseExited(e -> {
             card.setStyle("-fx-background-color: #3d3d3d; -fx-background-radius: 10; -fx-border-radius: 10;");
         });
+        BorderPane win = new WinTitle(animeNode.path("anime_id").asInt(), SearchTitles.client).createWin();
+        card.setOnMouseClicked(e -> parent.getChildren().add(win));
         
         return card;
     }

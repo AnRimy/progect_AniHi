@@ -137,7 +137,7 @@ public class TitlesOnMainWindow {
 	            button.setGraphic(mainButtonContainer);
 	            button.setContentDisplay(ContentDisplay.CENTER);
 
-	            button.setOnAction(e -> openDetailWindow(sharpImageView.getImage(), name, id, desc, data, client));
+	            button.setOnAction(e -> openDetailWindow(id, client));
 	            hBox_titleToday.getChildren().add(button);
 	        }
 	    } catch (Exception e) {
@@ -147,8 +147,8 @@ public class TitlesOnMainWindow {
 	    }
 	}
 	
-	private static void openDetailWindow(Image image, String name, int id, String desc, JsonNode data, Core client) {
-		WinTitle win = new WinTitle(image, name, id, desc, data, client);
+	private static void openDetailWindow(int id, Core client) {
+		WinTitle win = new WinTitle(id, client);
 		BorderPane winTitle = win.createWin();
 		borderPane_root.getChildren().add(winTitle);
 	}

@@ -120,12 +120,24 @@ public class Core {
     	return response.body();
     }
     
-    public String searchAnime(String name) throws Exception {
+    public String searchAnimeName(String name) throws Exception {
         String encodedName = java.net.URLEncoder.encode(name, StandardCharsets.UTF_8.toString());
         String url = String.format("%s/search?q=%s&offset=0&limit=5", baseUrl, encodedName);
         HttpResponse<String> response = client.send(requests(url), HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) 
             throw new RuntimeException("API request failed: " + response.statusCode());
+        return response.body();
+    }
+
+
+    public String searchAnimeId(int id, boolean needVideos) throws Exception {
+        String url = String.format("%s/anime/%d?need_videos=%b", baseUrl, id, needVideos);
+        HttpResponse<String> response = client.send(requests(url), HttpResponse.BodyHandlers.ofString());
+        
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("API request failed: " + response.statusCode() + 
+                                      " - " + response.body());
+        }
         return response.body();
     }
 }
