@@ -43,12 +43,16 @@ public class GuiCore extends Application {
 	    String apiKey = Config.getApiKey();
 	    client = new Core(baseUrl, apiKey);
 	    
+	    // bottom button
 		Button button_mainMenu = new Button("Main");
 		button_mainMenu.setPrefSize(50, 50);
 		button_mainMenu.setStyle("-fx-background-radius: 25px");
 		Button button_schedule = new Button("Schedule");
 		button_schedule.setPrefSize(50, 50);
 		button_schedule.setStyle("-fx-background-radius: 25px");
+		Button button_profil = new Button("Profil");
+		button_profil.setPrefSize(50, 50);
+		button_profil.setStyle("-fx-background-radius: 25px");
 		
 		// search widgets
 		StackPane sp_search = new StackPane();
@@ -85,7 +89,7 @@ public class GuiCore extends Application {
 		HBox stackPane_bot_panel = new HBox(20);
 		stackPane_bot_panel.setMaxWidth(500);
 		stackPane_bot_panel.setMinHeight(60);
-		stackPane_bot_panel.getChildren().addAll(button_mainMenu, button_schedule);
+		stackPane_bot_panel.getChildren().addAll(button_mainMenu, button_schedule, button_profil);
 		stackPane_bot_panel.setAlignment(Pos.CENTER);
 		stackPane_bot_panel.setStyle("-fx-background-color: rgba(155, 155, 155, 0.5);"
 				+ "-fx-border-radius: 30px;"

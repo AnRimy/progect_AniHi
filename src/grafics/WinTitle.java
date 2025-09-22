@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -15,6 +18,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
@@ -89,6 +93,65 @@ public class WinTitle extends Stage {
         
         // top content
         HBox topPanel = new HBox(10);
+        
+        ComboBox<String> statusTitle = new ComboBox<>();
+        statusTitle.setStyle("""
+        	    -fx-background-color: rgba(60, 60, 80, 0.8);
+        	    -fx-text-fill: white;
+        	    -fx-font-size: 14px;
+        	    -fx-pref-width: 150px;
+        	    -fx-background-radius: 10px;
+        	""");
+        ObservableList<String> options = FXCollections.observableArrayList(
+            "Не смотрю", "Смотрю", "В планах", "Просмотрено", "Отложено", "Брошено"
+        );
+        statusTitle.setItems(options);
+        statusTitle.setValue("Не смотрю");
+
+        statusTitle.setButtonCell(new ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item);
+                    setTextFill(Color.WHITE);
+                    setStyle("-fx-background-color: #34495e;");
+                    
+                    switch (item) {
+                        case "Смотрю":
+                            setTextFill(Color.LIGHTGREEN);
+                            break;
+                        case "В планах":
+                            setTextFill(Color.LIGHTBLUE);
+                            break;
+                        case "Просмотрено":
+                            setTextFill(Color.GREEN);
+                            break;
+                        case "Отложено":
+                            setTextFill(Color.ORANGE);
+                            break;
+                        case "Брошено":
+                            setTextFill(Color.RED);
+                            break;
+                        case "Не смотрю":
+                        default:
+                            setTextFill(Color.LIGHTGRAY);
+                            break;
+                    }
+                }
+                
+                setStyle("""
+                    -fx-font-size: 14px;
+                    -fx-font-weight: bold;
+                    -fx-background-color: transparent;
+                    -fx-border-width: 0;
+                """);
+            }
+        });
+        
         topPanel.setAlignment(Pos.CENTER_RIGHT);
         topPanel.setPadding(new Insets(20));
         topPanel.setStyle("-fx-background-color: rgba(25, 25, 35, 0.9); -fx-background-radius: 20px; -fx-border-radius: 20px;");
@@ -113,11 +176,14 @@ public class WinTitle extends Stage {
             """);
         closeBtn.setOnAction(e -> closeWindow(root));
         
-        topPanel.getChildren().addAll(titleLabel, closeBtn);
+        
+        topPanel.getChildren().addAll(statusTitle, titleLabel, closeBtn);
+        
         
         HBox centerContent = new HBox(20);
         centerContent.setPadding(new Insets(20));
         centerContent.setAlignment(Pos.TOP_CENTER);
+        
         
         // info panel
         VBox infoPanel = new VBox(15);
