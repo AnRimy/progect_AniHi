@@ -187,7 +187,7 @@ public class WinTitle extends Stage {
         
         // info panel
         VBox infoPanel = new VBox(15);
-        infoPanel.setMaxWidth(300);
+        infoPanel.setMaxWidth(650);
         infoPanel.setPadding(new Insets(15));
         infoPanel.setStyle("-fx-background-color: rgba(40, 40, 50, 0.8); -fx-background-radius: 20px;");
         
@@ -207,6 +207,7 @@ public class WinTitle extends Stage {
         genresLabel.setFont(Font.font("Arial", 14));
         genresLabel.setTextFill(Color.LIGHTGRAY);
         genresLabel.setWrapText(true);
+        genresLabel.setMaxWidth(600);
         
         Label descLabel = new Label(desc);
         descLabel.setFont(Font.font("Arial", 14));
@@ -214,6 +215,7 @@ public class WinTitle extends Stage {
         descLabel.setWrapText(true);
         
         infoPanel.getChildren().addAll(poster, genresLabel, descLabel);
+        infoPanel.setAlignment(Pos.TOP_CENTER);
         
         VBox videoPanel = new VBox(15);
         videoPanel.setAlignment(Pos.TOP_CENTER);
@@ -239,7 +241,7 @@ public class WinTitle extends Stage {
         seriesScroll.setPrefHeight(400);
         seriesScroll.setFitToWidth(true);
         
-        // constract
+        // assambly
         videoPanel.getChildren().addAll(videoPlayerContainer, seriesScroll);
         centerContent.getChildren().addAll(infoPanel, videoPanel);
         contentPane.setTop(topPanel);

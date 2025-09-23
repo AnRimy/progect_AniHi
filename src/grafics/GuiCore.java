@@ -156,13 +156,17 @@ public class GuiCore extends Application {
 		borderPane_root.setMargin(sp_search, new Insets(15, 15, 0, 0));
 		borderPane_root.setAlignment(stackPane_bot_panel, Pos.BOTTOM_CENTER);
 		borderPane_root.setMargin(stackPane_bot_panel, new Insets(15));
-
+		
+		// action
 		leftButton.setOnAction(e -> scrollLeft());
 		rightButton.setOnAction(e -> scrollRight());
 		button_search.setOnAction(e -> startSearch());
 
-		TitlesOnMainWindow.loadCatalogData(borderPane_root, hBox_titleToday, scrollTitleToday, client);
+		button_schedule.setOnAction(e -> openScheduleWindow());
 
+		// load data in main window
+		TitlesOnMainWindow.loadCatalogData(borderPane_root, hBox_titleToday, scrollTitleToday, client);
+		
 		Scene scene = new Scene(borderPane_root, 1920, 1080);
 		primaryStage.setTitle("AniHi");
 		primaryStage.setScene(scene);
@@ -178,7 +182,8 @@ public class GuiCore extends Application {
 	}
 	
 	private void openScheduleWindow() {
-		WinSchedule winSchedule = new WinSchedule();
+		WinSchedule winSchedule = new WinSchedule(borderPane_root, client);
+		winSchedule.createWin();
 	}
 	
 	private void startSearch() {

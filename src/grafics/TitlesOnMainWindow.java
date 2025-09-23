@@ -23,10 +23,9 @@ import mainLogic.Core;
 
 
 public class TitlesOnMainWindow {
-	static BorderPane borderPane_root;
+	static BorderPane parent;
 	public static void loadCatalogData(BorderPane parent, HBox hBox_titleToday, ScrollPane scrollTitleToday, Core client) {
-		borderPane_root = parent;
-
+	TitlesOnMainWindow.parent = parent;
 
 	    ObjectMapper mapper = new ObjectMapper();
 
@@ -34,7 +33,7 @@ public class TitlesOnMainWindow {
 	        String response = client.getOngoing();
 	        JsonNode rootNode = mapper.readTree(response).path("response");
 	        for (JsonNode data : rootNode) {
-	            String img = "https:" + data.path("poster").path("fullsize").asText();// fullsize 
+	            String img = "https:" + data.path("poster").path("fullsize").asText();
 	            int id = data.path("anime_id").asInt();
 	            String name = data.path("title").asText();
 	            String desc = data.path("description").asText("None");
@@ -150,6 +149,6 @@ public class TitlesOnMainWindow {
 	private static void openDetailWindow(int id, Core client) {
 		WinTitle win = new WinTitle(id, client);
 		BorderPane winTitle = win.createWin();
-		borderPane_root.getChildren().add(winTitle);
+		parent.getChildren().add(winTitle);
 	}
 }
