@@ -1,7 +1,9 @@
 package grafics;
 
+import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-
+import javafx.scene.layout.StackPane;
 import mainLogic.Core;
 
 public class WinSchedule {
@@ -14,21 +16,22 @@ public class WinSchedule {
         this.client = client;
     }
 
-	public void createWin()
-	{
-		parent.getChildren().clear();
-		BorderPane root = new BorderPane();
+    public void createWin() {
+        parent.getChildren().clear();
 
-		scheduleRoot = new BorderPane();
+        StackPane centerPane = new StackPane();
+        centerPane.setStyle("-fx-background-color: green;");
+        centerPane.setAlignment(Pos.CENTER);
         
-        BorderPane contentPanel = new BorderPane();
-        contentPanel.setStyle("""
-            -fx-background-color: 
-                linear-gradient(to bottom, #2c3e50, #34495e);
-            -fx-padding: 20px;
-        """);
+        BorderPane root = new BorderPane();
+        root.setStyle("-fx-background-color: red;");
+        root.setMinSize(400, 300);
         
-        scheduleRoot.setCenter(contentPanel);
-        parent.getChildren().add(scheduleRoot);
-	}
+        Label sc = new Label("asd");
+        sc.setStyle("-fx-text-fill: white; -fx-font-size: 18px;");
+        root.setCenter(sc);
+        
+        centerPane.getChildren().add(root);
+        parent.getChildren().add(centerPane); 
+    }
 }

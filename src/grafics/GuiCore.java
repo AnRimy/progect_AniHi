@@ -31,6 +31,8 @@ public class GuiCore extends Application {
 	private BorderPane borderPane_root;
 	private HBox hBox_titleToday;
 	private ScrollPane scrollTitleToday;
+	private BorderPane contentBlock;
+	StackPane overlayPane;
 
 	private TextField textField_search;
 	
@@ -38,19 +40,18 @@ public class GuiCore extends Application {
 	
 	@Override
 	public void start(Stage primaryStage) {
-		
 	    String baseUrl = Config.getApiUrl();
 	    String apiKey = Config.getApiKey();
 	    client = new Core(baseUrl, apiKey);
 	    
 	    // bottom button
-		Button button_mainMenu = new Button("Main");
+		Button button_mainMenu = createBottomButton("🏠", this::openMainWindow);
 		button_mainMenu.setPrefSize(50, 50);
 		button_mainMenu.setStyle("-fx-background-radius: 25px");
-		Button button_schedule = new Button("Schedule");
+		Button button_schedule = createBottomButton("📅", this::openScheduleWindow);
 		button_schedule.setPrefSize(50, 50);
 		button_schedule.setStyle("-fx-background-radius: 25px");
-		Button button_profil = new Button("Profil");
+		Button button_profil = createBottomButton("👨‍🦱", this::openProfilWindow);
 		button_profil.setPrefSize(50, 50);
 		button_profil.setStyle("-fx-background-radius: 25px");
 		
@@ -68,7 +69,7 @@ public class GuiCore extends Application {
 				+ "-fx-background-radius: 30px;"
 				+ "-fx-border-radius: 30px;");
 		
-		Button button_search = new Button("search");
+		Button button_search = new Button("🔍");
 		button_search.setPrefSize(48, 48);
 		button_search.setStyle("-fx-background-color: rgba(220, 25, 0, 1);"
 				+ "-fx-border-color: rgb(255, 234, 0);"
@@ -95,7 +96,8 @@ public class GuiCore extends Application {
 				+ "-fx-border-radius: 30px;"
 				+ "-fx-background-radius: 30px");
 
-		BorderPane borderPane = new BorderPane();
+		//content block
+		contentBlock = new BorderPane();
         
 		Button leftButton = new Button("⇦");
 		Button rightButton = new Button("⇨");
@@ -134,7 +136,7 @@ public class GuiCore extends Application {
 			    -fx-background: transparent;
 			""");
 
-		StackPane overlayPane = new StackPane();
+		overlayPane = new StackPane();
 		overlayPane.getChildren().add(scrollTitleToday);
 		overlayPane.getChildren().add(leftButton);
 		overlayPane.getChildren().add(rightButton);
@@ -148,21 +150,24 @@ public class GuiCore extends Application {
 				-fx-background: transparent;
 		""");
 
-		borderPane_root.setCenter(overlayPane);
-		borderPane_root.setMargin(overlayPane, new Insets(0, 4, 0, 4));
-		borderPane_root.setBottom(stackPane_bot_panel);
+		// companovca
+		contentBlock.setCenter(overlayPane);
+		contentBlock.setMargin(overlayPane, new Insets(0, 4, 0, 4));
+		
 		borderPane_root.setTop(sp_search);
 		borderPane_root.setAlignment(sp_search, Pos.TOP_RIGHT);
 		borderPane_root.setMargin(sp_search, new Insets(15, 15, 0, 0));
+		
+		borderPane_root.setBottom(stackPane_bot_panel);
 		borderPane_root.setAlignment(stackPane_bot_panel, Pos.BOTTOM_CENTER);
 		borderPane_root.setMargin(stackPane_bot_panel, new Insets(15));
+		
+		borderPane_root.setCenter(contentBlock);
 		
 		// action
 		leftButton.setOnAction(e -> scrollLeft());
 		rightButton.setOnAction(e -> scrollRight());
 		button_search.setOnAction(e -> startSearch());
-
-		button_schedule.setOnAction(e -> openScheduleWindow());
 
 		// load data in main window
 		TitlesOnMainWindow.loadCatalogData(borderPane_root, hBox_titleToday, scrollTitleToday, client);
@@ -173,6 +178,7 @@ public class GuiCore extends Application {
 		primaryStage.show();
 	}
 
+	// scrolling recommendations
 	private void scrollRight() {
 		scrollTitleToday.setHvalue(scrollTitleToday.getHvalue() + 0.2);
 	}
@@ -181,10 +187,32 @@ public class GuiCore extends Application {
 		scrollTitleToday.setHvalue(scrollTitleToday.getHvalue() - 0.2);
 	}
 	
+	// create bottom button 
+	private Button createBottomButton(String text, Runnable action) {
+		Button btn = new Button(text);
+		btn.setStyle("""
+	            -fx-background-color: #3498db;
+	            -fx-text-fill: white;
+	            -fx-padding: 10 20;
+	            -fx-background-radius: 5;
+	        """);
+		btn.setOnAction(e->action.run());
+		return btn;
+	}
+	
+	
+	
+	private void openMainWindow(){
+		contentBlock.getChildren().clear();
+		contentBlock.getChildren().add(overlayPane);
+	}
+	
 	private void openScheduleWindow() {
-		WinSchedule winSchedule = new WinSchedule(borderPane_root, client);
+		WinSchedule winSchedule = new WinSchedule(contentBlock, client);
 		winSchedule.createWin();
 	}
+	
+	private void openProfilWindow() {}
 	
 	private void startSearch() {
 		if (textField_search.getText().length() >= 3)
