@@ -98,7 +98,7 @@ public class GuiCore extends Application {
 
 		//content block
 		contentBlock = new BorderPane();
-        
+
 		Button leftButton = new Button("⇦");
 		Button rightButton = new Button("⇨");
 
@@ -156,13 +156,14 @@ public class GuiCore extends Application {
 		
 		borderPane_root.setTop(sp_search);
 		borderPane_root.setAlignment(sp_search, Pos.TOP_RIGHT);
-		borderPane_root.setMargin(sp_search, new Insets(15, 15, 0, 0));
+		borderPane_root.setMargin(sp_search, new Insets(15, 15, 15, 0));
 		
 		borderPane_root.setBottom(stackPane_bot_panel);
 		borderPane_root.setAlignment(stackPane_bot_panel, Pos.BOTTOM_CENTER);
 		borderPane_root.setMargin(stackPane_bot_panel, new Insets(15));
 		
 		borderPane_root.setCenter(contentBlock);
+		borderPane_root.setMargin(contentBlock, new Insets(0, 5, 0, 5));
 		
 		// action
 		leftButton.setOnAction(e -> scrollLeft());
