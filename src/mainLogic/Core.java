@@ -93,7 +93,7 @@ public class Core {
     
     
     public String getSchedule() throws Exception{
-    	themeParam = "anime/catalog";
+    	themeParam = "anime/schedule";
     	String url = String.format("%s/%s", baseUrl, themeParam);
     	HttpResponse<String> response = client.send(requests(url), HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) 
