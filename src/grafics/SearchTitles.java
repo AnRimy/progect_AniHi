@@ -37,7 +37,7 @@ public class SearchTitles {
             resultsContainer.setPadding(new Insets(20));
             resultsContainer.setStyle("-fx-background-color: #2d2d2d;");
             
-            HBox headerBox = new HBox();
+            HBox headerBox = new HBox(15);
             headerBox.setAlignment(Pos.CENTER_LEFT);
             headerBox.setPadding(new Insets(0, 0, 20, 0));
             

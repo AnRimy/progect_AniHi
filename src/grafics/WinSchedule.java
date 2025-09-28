@@ -6,9 +6,14 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 import mainLogic.Core;
 
 import java.time.Instant;
@@ -18,10 +23,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WinSchedule {
+	private BorderPane main_parent;
     private BorderPane parent;
     private Core client;
     
-    public WinSchedule(BorderPane parent, Core client) {
+    public WinSchedule(BorderPane main_parent, BorderPane parent, Core client) {
+    	this.main_parent = main_parent;
         this.parent = parent;
         this.client = client;
     }
@@ -37,7 +44,10 @@ public class WinSchedule {
             JsonNode rootNode = mapper.readTree(response).path("response");
             
             VBox scheduleContent = createScheduleContent(rootNode);
-            mainContainer.setCenter(scheduleContent);
+            scheduleContent.setMaxWidth(500);
+            scheduleContent.setStyle("-fx-background-color: red;");
+            mainContainer.setLeft(scheduleContent);
+            
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -50,7 +60,6 @@ public class WinSchedule {
     
     private VBox createScheduleContent(JsonNode animeArray) {
         VBox daysContainer = new VBox();
-        
         List<List<JsonNode>> daysAnime = groupAnimeByDay(animeArray);
         
         String[] dayNames = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"};
@@ -95,6 +104,17 @@ public class WinSchedule {
     
     private VBox createDayPanel(String dayName, List<JsonNode> animeList) {
         VBox dayPanel = new VBox();
+        dayPanel.setMinHeight(50);
+        dayPanel.setPrefHeight(50);
+        
+        dayPanel.setOnMouseEntered(e -> {
+        	dayPanel.setMinHeight(280);
+        	dayPanel.setPrefHeight(Region.USE_COMPUTED_SIZE);
+    	});
+        dayPanel.setOnMouseExited(e -> {
+        	dayPanel.setMinHeight(50);
+        	dayPanel.setPrefHeight(50);
+    	});
         
         Label dayLabel = new Label(dayName);
         
@@ -120,10 +140,11 @@ public class WinSchedule {
     }
     
     private Button createAnimeButton(JsonNode anime) {
+    	String img = "https:" + anime.path("poster").path("fullsize").asText();
         String title = anime.path("title").asText("Без названия");
         int airedEpisodes = anime.path("episodes").path("aired").asInt();
         int totalEpisodes = anime.path("episodes").path("count").asInt();
-        long nextDate = anime.path("episodes").path("next_date").asLong();
+//        long nextDate = anime.path("episodes").path("next_date").asLong();
         
         Button button = new Button();
         
@@ -137,6 +158,17 @@ public class WinSchedule {
         
         button.setText(buttonText);
         
+        ImageView sharpImageView = new ImageView(new Image(img, 140, 200, true, true, true));
+        sharpImageView.setFitWidth(140);
+        sharpImageView.setFitHeight(200);
+        sharpImageView.setPreserveRatio(true);
+        Rectangle clip = new Rectangle(140, 200);
+        clip.setArcWidth(20);
+        clip.setArcHeight(20);
+        sharpImageView.setClip(clip);
+        
+        button.setGraphic(sharpImageView);
+        
         button.setOnAction(e -> {
             int animeId = anime.path("anime_id").asInt();
             openAnimeDetails(animeId);
@@ -146,5 +178,8 @@ public class WinSchedule {
     }
     
     private void openAnimeDetails(int animeId) {
+    	WinTitle win = new WinTitle(animeId, client);
+    	win.createWin();
+    	main_parent.getChildren().add(win.createWin());
     }
 }

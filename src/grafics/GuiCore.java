@@ -209,7 +209,7 @@ public class GuiCore extends Application {
 	}
 	
 	private void openScheduleWindow() {
-		WinSchedule winSchedule = new WinSchedule(contentBlock, client);
+		WinSchedule winSchedule = new WinSchedule(borderPane_root, contentBlock, client);
 		winSchedule.createWin();
 	}
 	
