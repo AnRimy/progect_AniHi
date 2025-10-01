@@ -53,7 +53,7 @@ public class WinSchedule {
             
             VBox scheduleContent = createScheduleContent(rootNode);
             scheduleContent.setMaxWidth(500);
-            scheduleContent.setStyle("-fx-background-color: red;");
+            scheduleContent.setStyle("-fx-background-color: rgba(200, 25, 0, 0.2); -fx-background-radius: 25px;");
             mainContainer.setLeft(scheduleContent);
             
             
@@ -66,7 +66,6 @@ public class WinSchedule {
         parent.setCenter(mainContainer);
         parent.setMargin(mainContainer, new Insets(5));
     }
-    
     
     
     private VBox createScheduleContent(JsonNode animeArray) {
@@ -120,7 +119,7 @@ public class WinSchedule {
         VBox dayPanel = new VBox();
         dayPanel.setMinHeight(50);
         dayPanel.setPrefHeight(50);
-        dayPanel.setStyle("-fx-background-color: green");
+//        dayPanel.setStyle("-fx-background-color: green");
         dayPanel.setPadding(new Insets(5));
         
         Label dayLabel = new Label(dayName);
@@ -151,11 +150,9 @@ public class WinSchedule {
         
         dayPanel.getChildren().addAll(dayLabel, scrollPane);
         
-        // Создаем контейнер с дополнительным пространством сверху
         VBox containerWithBuffer = new VBox();
         containerWithBuffer.setSpacing(0);
         
-        // Добавляем невидимый буфер сверху (20px)
         Region topBuffer = new Region();
         topBuffer.setMinHeight(20);
         topBuffer.setPrefHeight(20);
@@ -165,7 +162,6 @@ public class WinSchedule {
         
         final SimpleBooleanProperty isExpanded = new SimpleBooleanProperty(false);
         
-        // Обработчики для буфера и панели
         Node[] hoverNodes = {topBuffer, dayPanel};
         
         for (Node node : hoverNodes) {
@@ -218,7 +214,6 @@ public class WinSchedule {
         
         button.setText(buttonText);
         
-        // Уменьшаем размер изображения, чтобы освободить место для текста
         ImageView sharpImageView = new ImageView(new Image(img, 100, 150, true, true, true));
         sharpImageView.setFitWidth(100);
         sharpImageView.setFitHeight(150);
@@ -230,21 +225,17 @@ public class WinSchedule {
         
         button.setGraphic(sharpImageView);
         
-        // Настраиваем размеры кнопки
         button.setMinWidth(120);
         button.setPrefWidth(120);
         button.setMaxWidth(120);
         
-        // Устанавливаем фиксированную высоту для кнопки
         button.setMinHeight(200);
         button.setPrefHeight(200);
         button.setMaxHeight(200);
         
-        // Включаем перенос текста
         button.setWrapText(true);
         
-        // Выравнивание текста по центру
-        button.setAlignment(Pos.CENTER);
+button.setAlignment(Pos.CENTER);
         
         button.setOnAction(e -> {
             int animeId = anime.path("anime_id").asInt();
