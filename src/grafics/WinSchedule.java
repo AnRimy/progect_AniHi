@@ -2,8 +2,14 @@ package grafics;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import javafx.animation.PauseTransition;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
@@ -11,9 +17,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 import mainLogic.Core;
 
 import java.time.Instant;
@@ -56,16 +64,22 @@ public class WinSchedule {
         }
         
         parent.setCenter(mainContainer);
+        parent.setMargin(mainContainer, new Insets(5));
     }
     
+    
+    
     private VBox createScheduleContent(JsonNode animeArray) {
-        VBox daysContainer = new VBox();
+        VBox daysContainer = new VBox(15);
+        daysContainer.setPadding(new Insets(10));
+        
         List<List<JsonNode>> daysAnime = groupAnimeByDay(animeArray);
         
         String[] dayNames = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"};
         
         for (int i = 0; i < 7; i++) {
             VBox dayPanel = createDayPanel(dayNames[i], daysAnime.get(i));
+            VBox.setMargin(dayPanel, new Insets(0, 0, 10, 0));
             daysContainer.getChildren().add(dayPanel);
         }
         
@@ -106,22 +120,21 @@ public class WinSchedule {
         VBox dayPanel = new VBox();
         dayPanel.setMinHeight(50);
         dayPanel.setPrefHeight(50);
-        
-        dayPanel.setOnMouseEntered(e -> {
-        	dayPanel.setMinHeight(280);
-        	dayPanel.setPrefHeight(Region.USE_COMPUTED_SIZE);
-    	});
-        dayPanel.setOnMouseExited(e -> {
-        	dayPanel.setMinHeight(50);
-        	dayPanel.setPrefHeight(50);
-    	});
+        dayPanel.setStyle("-fx-background-color: green");
+        dayPanel.setPadding(new Insets(5));
         
         Label dayLabel = new Label(dayName);
+        dayLabel.setPadding(new Insets(0, 0, 5, 0));
+        dayLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
         
         HBox animeContainer = new HBox();
+        animeContainer.setSpacing(10);
+        animeContainer.setAlignment(Pos.TOP_LEFT);
         
         if (animeList.isEmpty()) {
             Label noAnimeLabel = new Label("На этот день аниме не запланировано");
+            noAnimeLabel.setPadding(new Insets(5));
+            noAnimeLabel.setAlignment(Pos.CENTER);
             animeContainer.getChildren().add(noAnimeLabel);
         } else {
             for (JsonNode anime : animeList) {
@@ -134,19 +147,66 @@ public class WinSchedule {
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setFitToHeight(true);
+        scrollPane.setPadding(new Insets(0));
         
         dayPanel.getChildren().addAll(dayLabel, scrollPane);
-        return dayPanel;
+        
+        // Создаем контейнер с дополнительным пространством сверху
+        VBox containerWithBuffer = new VBox();
+        containerWithBuffer.setSpacing(0);
+        
+        // Добавляем невидимый буфер сверху (20px)
+        Region topBuffer = new Region();
+        topBuffer.setMinHeight(20);
+        topBuffer.setPrefHeight(20);
+        topBuffer.setStyle("-fx-background-color: transparent");
+        
+        containerWithBuffer.getChildren().addAll(topBuffer, dayPanel);
+        
+        final SimpleBooleanProperty isExpanded = new SimpleBooleanProperty(false);
+        
+        // Обработчики для буфера и панели
+        Node[] hoverNodes = {topBuffer, dayPanel};
+        
+        for (Node node : hoverNodes) {
+            node.setOnMouseEntered(e -> {
+                if (!isExpanded.get()) {
+                    dayPanel.setPrefHeight(Region.USE_COMPUTED_SIZE);
+                    isExpanded.set(true);
+                }
+            });
+            
+            node.setOnMouseExited(e -> {
+                PauseTransition pause = new PauseTransition(Duration.millis(200));
+                pause.setOnFinished(event -> {
+                    boolean stillHovered = false;
+                    for (Node n : hoverNodes) {
+                        if (n.isHover()) {
+                            stillHovered = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!stillHovered && isExpanded.get()) {
+                        dayPanel.setPrefHeight(50);
+                        isExpanded.set(false);
+                    }
+                });
+                pause.play();
+            });
+        }
+        
+        return containerWithBuffer;
     }
     
     private Button createAnimeButton(JsonNode anime) {
-    	String img = "https:" + anime.path("poster").path("fullsize").asText();
+        String img = "https:" + anime.path("poster").path("fullsize").asText();
         String title = anime.path("title").asText("Без названия");
         int airedEpisodes = anime.path("episodes").path("aired").asInt();
         int totalEpisodes = anime.path("episodes").path("count").asInt();
-//        long nextDate = anime.path("episodes").path("next_date").asLong();
         
         Button button = new Button();
+        button.setContentDisplay(ContentDisplay.TOP);
         
         String buttonText = title;
         if (airedEpisodes > 0) {
@@ -158,16 +218,33 @@ public class WinSchedule {
         
         button.setText(buttonText);
         
-        ImageView sharpImageView = new ImageView(new Image(img, 140, 200, true, true, true));
-        sharpImageView.setFitWidth(140);
-        sharpImageView.setFitHeight(200);
+        // Уменьшаем размер изображения, чтобы освободить место для текста
+        ImageView sharpImageView = new ImageView(new Image(img, 100, 150, true, true, true));
+        sharpImageView.setFitWidth(100);
+        sharpImageView.setFitHeight(150);
         sharpImageView.setPreserveRatio(true);
-        Rectangle clip = new Rectangle(140, 200);
-        clip.setArcWidth(20);
-        clip.setArcHeight(20);
+        Rectangle clip = new Rectangle(100, 150);
+        clip.setArcWidth(15);
+        clip.setArcHeight(15);
         sharpImageView.setClip(clip);
         
         button.setGraphic(sharpImageView);
+        
+        // Настраиваем размеры кнопки
+        button.setMinWidth(120);
+        button.setPrefWidth(120);
+        button.setMaxWidth(120);
+        
+        // Устанавливаем фиксированную высоту для кнопки
+        button.setMinHeight(200);
+        button.setPrefHeight(200);
+        button.setMaxHeight(200);
+        
+        // Включаем перенос текста
+        button.setWrapText(true);
+        
+        // Выравнивание текста по центру
+        button.setAlignment(Pos.CENTER);
         
         button.setOnAction(e -> {
             int animeId = anime.path("anime_id").asInt();
@@ -183,3 +260,6 @@ public class WinSchedule {
     	main_parent.getChildren().add(win.createWin());
     }
 }
+
+
+

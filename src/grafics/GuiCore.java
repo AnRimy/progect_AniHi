@@ -163,7 +163,6 @@ public class GuiCore extends Application {
 		borderPane_root.setMargin(stackPane_bot_panel, new Insets(15));
 		
 		borderPane_root.setCenter(contentBlock);
-		borderPane_root.setMargin(contentBlock, new Insets(0, 5, 0, 5));
 		
 		// action
 		leftButton.setOnAction(e -> scrollLeft());
@@ -200,8 +199,6 @@ public class GuiCore extends Application {
 		btn.setOnAction(e->action.run());
 		return btn;
 	}
-	
-	
 	
 	private void openMainWindow(){
 		contentBlock.getChildren().clear();
