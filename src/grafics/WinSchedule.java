@@ -119,7 +119,7 @@ public class WinSchedule {
         VBox dayPanel = new VBox();
         dayPanel.setMinHeight(50);
         dayPanel.setPrefHeight(50);
-//        dayPanel.setStyle("-fx-background-color: green");
+        dayPanel.setStyle("-fx-background-color: green");
         dayPanel.setPadding(new Insets(5));
         
         Label dayLabel = new Label(dayName);
@@ -147,6 +147,7 @@ public class WinSchedule {
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setFitToHeight(true);
         scrollPane.setPadding(new Insets(0));
+        scrollPane.setVisible(false);
         
         dayPanel.getChildren().addAll(dayLabel, scrollPane);
         
@@ -168,12 +169,14 @@ public class WinSchedule {
             node.setOnMouseEntered(e -> {
                 if (!isExpanded.get()) {
                     dayPanel.setPrefHeight(Region.USE_COMPUTED_SIZE);
+//                    scrollPane.setMinHeight(220);
+                	scrollPane.setVisible(true);
                     isExpanded.set(true);
                 }
             });
             
             node.setOnMouseExited(e -> {
-                PauseTransition pause = new PauseTransition(Duration.millis(200));
+                PauseTransition pause = new PauseTransition(Duration.millis(300));
                 pause.setOnFinished(event -> {
                     boolean stillHovered = false;
                     for (Node n : hoverNodes) {
@@ -185,13 +188,13 @@ public class WinSchedule {
                     
                     if (!stillHovered && isExpanded.get()) {
                         dayPanel.setPrefHeight(50);
+                        scrollPane.setVisible(false);
                         isExpanded.set(false);
                     }
                 });
                 pause.play();
             });
         }
-        
         return containerWithBuffer;
     }
     
